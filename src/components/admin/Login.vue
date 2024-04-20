@@ -35,11 +35,6 @@ const isValidEmail = (email) => {
     return regex.test(email);
 }
 
-const isValidPhone = (phone) => {
-    var regex = /^\d{10}$/;
-    return regex.test(phone);
-}
-
 const validateAdminLogin = () => {
     if (email.value === null || email.value === '' || !isValidEmail(email.value)) {
         showToast('Incorrect email or password.', 'error')
