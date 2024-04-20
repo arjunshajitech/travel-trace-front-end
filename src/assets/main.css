@@ -1,0 +1,83 @@
+.user-login,
+.admin-login,
+.busowner-login {
+    height: 85vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .card {
+        width: 800px;
+    }
+
+    .w-full {
+        justify-content: center;
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+        max-width: 50rem !important;
+    }
+
+    .p-inputtext {
+        width: 400px;
+    }
+
+    .p-button {
+        width: 400px;
+    }
+
+    .login-register-link {
+        margin-top: 20px;
+        font-size: 18px;
+        text-decoration: none;
+        cursor: pointer;
+        color: #3B82F6;
+    }
+
+    h1 {
+        color: #3B82F6;
+    }
+}
+
+.user-navbar,
+.admin-navbar,
+.busowner-navbar {
+
+    .p-menubar {
+        justify-content: center;
+    }
+
+    span {
+        font-size: 20px;
+        margin: 0px 10px 0px 10px;
+    }
+}
+
+
+.user-feedback {
+
+    .p-fieldset {
+        margin: 30px 30px 30px 30px;
+    }
+}
+
+.admin-home {
+
+    .p-tabmenu {
+        margin-top: 40px;
+    }
+
+    .p-tabmenu-nav {
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+.admin-list-bus-owners,
+.admin-list-users {
+
+    .card {
+        margin: 30px 30px 0px 30px;
+    }
+}
