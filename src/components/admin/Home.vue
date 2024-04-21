@@ -19,55 +19,10 @@ const errors = ref({
     phone: false
 })
 const busOwnersList = ref([])
-
-
-const dt = ref();
-const products = [
-    {
-        id: '1000',
-        code: 'kkkk',
-        name: 'Bamboo Watch',
-        description: 'Product Description',
-        image: 'bamboo-watch.jpg',
-        price: 65,
-        category: 'Accessories',
-        quantity: 24,
-        inventoryStatus: 'INSTOCK',
-        rating: 5
-    },
-    {
-        id: '1000',
-        code: 'f230fh0g3',
-        name: 'gggggggg Watch',
-        description: 'Product Description',
-        image: 'bamboo-watch.jpg',
-        price: 65,
-        category: 'Accessories',
-        quantity: 24,
-        inventoryStatus: 'INSTOCK',
-        rating: 5
-    },
-    {
-        id: '1000',
-        code: 'f230fh0g3',
-        name: 'Bamboo Watch',
-        description: 'Product Description',
-        image: 'bamboo-watch.jpg',
-        price: 65,
-        category: 'Accessories',
-        quantity: 24,
-        inventoryStatus: 'INSTOCK',
-        rating: 5
-    }
-];
 const busOwnerDialog = ref(false);
-const deleteProductDialog = ref(false);
-const product = ref({});
-const selectedProducts = ref();
 const filters = ref({
     'global': { value: null, matchMode: FilterMatchMode.CONTAINS },
 });
-const submitted = ref(false);
 
 const tabMenuItems = ref([
     {
@@ -259,7 +214,7 @@ const deleteBusOwner = (id) => {
                 </template>
             </Toolbar>
 
-            <DataTable ref="dt" :value="busOwnersList" dataKey="id" :paginator="true" :rows="10" :filters="filters"
+            <DataTable scrollable scrollHeight="400px" ref="dt" :value="busOwnersList" dataKey="id" :paginator="true" :rows="10" :filters="filters"
                 paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                 :rowsPerPageOptions="[5, 10, 25]"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} bus owners">
@@ -326,7 +281,7 @@ const deleteBusOwner = (id) => {
 
     <div class="admin-list-users" v-else>
         <div class="card">
-            <DataTable ref="dt" :value="products" v-model:selection="selectedProducts" dataKey="id" :paginator="true"
+            <DataTable scrollable scrollHeight="400px" ref="dt" :value="products" v-model:selection="selectedProducts" dataKey="id" :paginator="true"
                 :rows="10" :filters="filters"
                 paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                 :rowsPerPageOptions="[5, 10, 25]"

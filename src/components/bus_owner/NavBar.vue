@@ -1,12 +1,71 @@
 <script setup>
 import { ref } from "vue";
+import { useRouter } from 'vue-router';
+import { useToast } from "primevue/usetoast";
+import axios from 'axios';
+
+axios.defaults.withCredentials = true;
+const toast = useToast();
+const router = useRouter();
+const showLogoutButton = ref(false);
+const CURRENT_URL = window.location.href;
+const BASE_URL = 'http://localhost:8080/busowner'
+const FRONT_END_BASE_URL = "http://localhost:5173"
+
+const sessionCheck = () => {
+    if (FRONT_END_BASE_URL + "/busowner/home" === CURRENT_URL) {
+        const PROFILE_URL = BASE_URL + '/me'
+        axios.get(PROFILE_URL).then(() => {
+            showLogoutButton.value = true;
+        }).catch((error) => {
+            showLogoutButton.value = false;
+            router.push('/busowner')
+            console.error(error)
+        });
+    }
+}
+sessionCheck();
 
 const NavBarItems = ref([
     {
         label: 'Bus Trace',
+        icon: 'pi pi-map-marker',
+    },
+    {
+        label: 'Bus Owner Panel',
         icon: 'pi pi-home'
+    },
+    {
+        label: 'Logout',
+        icon: 'pi pi-sign-out',
+        command: () => {
+            logout();
+        },
+        visible: showLogoutButton
     }
 ]);
+
+const showToast = (content, type) => {
+    if (type === 'success')
+        toast.add({ severity: 'info', summary: 'Bus Owner', detail: content, group: 'br', life: 3000 });
+    else if (type === 'error')
+        toast.add({ severity: 'error', summary: 'Bus Owner', detail: content, group: 'br', life: 3000 });
+    else if (type === 'warning') {
+        toast.add({ severity: 'warn', summary: 'Bus Owner', detail: content, group: 'br', life: 3000 });
+    } else null;
+}
+
+const logout = () => {
+    const LOGOUT_URL = BASE_URL + '/logout'
+    axios.get(LOGOUT_URL).then((res) => {
+        if (res.status === 200) {
+            showToast('Logout Success.', 'success')
+            setTimeout(() => {
+                router.push('/busowner');
+            }, 600);
+        }
+    }).catch((error) => { console.error(error) });
+}
 </script>
 
 

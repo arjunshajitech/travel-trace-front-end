@@ -62,7 +62,8 @@
     }
 }
 
-.admin-home {
+.admin-home,
+.busowner-home {
 
     .p-tabmenu {
         margin-top: 40px;
@@ -75,7 +76,10 @@
 }
 
 .admin-list-bus-owners,
-.admin-list-users {
+.admin-list-users,
+.busowner-list-bus,
+.busowner-list-routes,
+.busowner-list-sub-routes {
 
     .card {
         margin: 30px 30px 0px 30px;

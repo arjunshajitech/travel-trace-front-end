@@ -29,7 +29,7 @@ sessionCheck();
 const NavBarItems = ref([
     {
         label: 'Bus Trace',
-        icon: 'pi pi-map-marker'
+        icon: 'pi pi-map-marker',
     },
     {
         label: 'Admin Panel',
@@ -42,7 +42,6 @@ const NavBarItems = ref([
             logout();
         },
         visible: showLogoutButton
-
     }
 ]);
 
