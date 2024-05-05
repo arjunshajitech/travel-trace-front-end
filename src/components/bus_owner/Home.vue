@@ -35,8 +35,23 @@ const createRouteError = ref({
     weekDay: false
 })
 
-const buses = ref([])
+const createSubRouteDialog = ref(false);
+const subRouteList = ref([])
+const createSubRouteRequest = ref({})
+const createSubRouteError = ref({
+    route: false,
+    location: false,
+    time: false,
+})
+const routes = ref([])
+const initRoutes = () => {
+    routeList.value.forEach(route => {
+        const { id } = route;
+        routes.value.push({ id });
+    });
+}
 
+const buses = ref([])
 const initBuses = () => {
     busList.value.forEach(bus => {
         const { busName, id } = bus;
@@ -77,14 +92,16 @@ const tabMenuItems = ref([
     {
         label: 'Routes', icon: 'pi pi-users',
         command: () => {
-            display.value = 'routes',
-                getAllRoutes();
+            display.value = 'routes'
+            getAllRoutes();
         }
     },
     {
         label: 'Sub Routes', icon: 'pi pi-users',
         command: () => {
             display.value = 'sub_routes'
+            getAllRoutes();
+            getAllSubRoutes();
         }
     }
 ]);
@@ -116,8 +133,21 @@ const createRoute = () => {
     createRouteError.value.endTime = false;
     createRouteError.value.weekDay = false;
     createRouteError.value.bus = false;
-
 }
+
+const createBusSubRoute = () => {
+    routes.value = []
+    initRoutes();
+    createSubRouteError.value.route = false
+    createSubRouteError.value.location = false
+    createSubRouteError.value.time = false
+    createSubRouteRequest.value = {};
+    createSubRouteDialog.value = true;
+};
+
+const hideCreateBusSubRouteDialog = () => {
+    createSubRouteDialog.value = false;
+};
 
 
 const showToast = (content, type) => {
@@ -141,8 +171,12 @@ const isValidPhone = (phone) => {
 }
 
 const convertTime = (timeString) => {
-    const originalDate = new Date(timeString);
-    return originalDate.toLocaleTimeString();
+    try {
+        const originalDate = new Date(timeString);
+        return originalDate.toLocaleTimeString();
+    } catch (error) {
+        showToast('Please provide a valid time.', 'warning');
+    }
 }
 
 const validSaveRoute = () => {
@@ -283,11 +317,11 @@ const saveRoute = () => {
             createRouteDialog.value = false;
         }
     }).catch((error) => {
-        // if (error.response.status === 400) {
-        //     showToast('Registration number already exists.', 'error');
-        // } else {
-        //     showToast('Something went wrong.', 'warning');
-        // }
+        if (error.response.status === 400) {
+            showToast('Please provide a valid bus.', 'error');
+        } else {
+            showToast('Something went wrong.', 'warning');
+        }
         console.error(error);
     });
 }
@@ -327,6 +361,68 @@ const deleteRoute = (id) => {
         },
         reject: () => {
             showToast('Delete Route Cancelled.', 'warning')
+        }
+    });
+}
+
+const saveSubRoute = () => {
+
+
+    const CREATE_SUB_ROUTE = BASE_URL + '/sub/routes'
+    axios.post(CREATE_SUB_ROUTE, {
+        routeId: createSubRouteRequest.value.id.id,
+        location: createSubRouteRequest.value.location.name,
+        busTime: convertTime(createSubRouteRequest.value.time)
+    }).then((response) => {
+        if (response.status === 200) {
+            showToast('Sub Route Created.', 'success')
+            getAllSubRoutes();
+            createSubRouteDialog.value = false;
+        }
+    }).catch((error) => {
+        if (error.response.status === 400) {
+            //showToast('Please provide a valid bus.', 'error');
+        } else {
+            showToast('Something went wrong.', 'warning');
+        }
+    });
+}
+
+const getAllSubRoutes = () => {
+    const GET_SUB_ROUTE = BASE_URL + '/sub/routes'
+    axios.get(GET_SUB_ROUTE).then((response) => {
+        if (response.status === 200) {
+            subRouteList.value = response.data;
+        }
+    }).catch((error) => {
+        showToast('Something went wrong.', 'warning');
+        console.error(error);
+    });
+}
+
+const deleteSubRoute = (id) => {
+    confirm.require({
+        message: 'Do you want to delete Sub Route ?',
+        header: 'Danger Zone',
+        icon: 'pi pi-info-circle',
+        rejectLabel: 'Cancel',
+        acceptLabel: 'Delete',
+        rejectClass: 'p-button-secondary p-button-outlined',
+        acceptClass: 'p-button-danger',
+        accept: () => {
+            const DELETE_ROUTE = BASE_URL + '/sub/routes/' + id;
+            axios.delete(DELETE_ROUTE).then((response) => {
+                if (response.status === 200) {
+                    getAllSubRoutes();
+                    showToast('Sub Route Deleted.', 'success')
+                }
+            }).catch((error) => {
+                showToast('Something went wrong.', 'warning');
+                console.error(error);
+            });
+        },
+        reject: () => {
+            showToast('Delete Sub Route Cancelled.', 'warning')
         }
     });
 }
@@ -417,7 +513,7 @@ const deleteRoute = (id) => {
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} routes">
                 <template #header>
                     <div class="flex flex-wrap gap-2 align-items-center justify-content-between">
-                        <h4 class="m-0">Buses</h4>
+                        <h4 class="m-0">Routes</h4>
                         <IconField iconPosition="left">
                             <InputIcon>
                                 <i class="pi pi-search" />
@@ -427,6 +523,7 @@ const deleteRoute = (id) => {
                     </div>
                 </template>
 
+                <Column field="id" header="Route Id" sortable style="min-width:12rem"></Column>
                 <Column field="busName" header="Bus Name" sortable style="min-width:12rem"></Column>
                 <Column field="startLocation" header="Start Location" sortable style="min-width:12rem"></Column>
                 <Column field="endLocation" header="End Location" sortable style="min-width:12rem"></Column>
@@ -483,6 +580,73 @@ const deleteRoute = (id) => {
             <template #footer>
                 <Button label="Cancel" icon="pi pi-times" text @click="hideCreateRouteDialog" />
                 <Button label="Save" icon="pi pi-check" text @click="saveRoute" />
+            </template>
+        </Dialog>
+    </div>
+
+    <div class="busowner-list-routes" v-else-if="display === 'sub_routes'">
+        <div class="card">
+            <Toast position="bottom-right" group="br" />
+            <ConfirmDialog></ConfirmDialog>
+            <Toolbar class="mb-4">
+                <template #start>
+                    <Button label="Create Sub Routes" icon="pi pi-plus" class="mr-2" @click="createBusSubRoute()" />
+                </template>
+            </Toolbar>
+
+            <DataTable scrollable scrollHeight="400px" ref="dt" :value="subRouteList" dataKey="id" :paginator="true"
+                :rows="10" :filters="filters"
+                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                :rowsPerPageOptions="[5, 10, 25]"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} sub routes">
+                <template #header>
+                    <div class="flex flex-wrap gap-2 align-items-center justify-content-between">
+                        <h4 class="m-0">Sub Routes</h4>
+                        <IconField iconPosition="left">
+                            <InputIcon>
+                                <i class="pi pi-search" />
+                            </InputIcon>
+                            <InputText v-model="filters['global'].value" placeholder="Search..." />
+                        </IconField>
+                    </div>
+                </template>
+
+                <Column field="routeId" header="Route Id" sortable style="min-width:12rem"></Column>
+                <Column field="busId" header="Bus Id" sortable style="min-width:12rem"></Column>
+                <Column field="location" header="Location" sortable style="min-width:12rem"></Column>
+                <Column field="busTime" header="Time" sortable style="min-width:12rem"></Column>
+
+                <Column :exportable="false" style="min-width:8rem">
+                    <template #body="slotProps">
+                        <Button icon="pi pi-trash" outlined rounded severity="danger"
+                            @click="deleteSubRoute(slotProps.data.id)" />
+                    </template>
+                </Column>
+            </DataTable>
+        </div>
+
+        <Dialog v-model:visible="createSubRouteDialog" :style="{ width: '450px' }" header="Create Sub Route"
+            :modal="true" class="p-fluid">
+            <div class="field">
+                <label for="name">Select Route ID</label>
+                <Dropdown v-model="createSubRouteRequest.id" editable :options="routes" optionLabel="id"
+                    placeholder="Search route id" class="w-full md:w-25rem" />
+                <small class="p-error" v-if="createSubRouteError.route">Invalid Route Id.</small>
+            </div>
+            <div class="field">
+                <label for="name">Location</label>
+                <Dropdown v-model="createSubRouteRequest.location" editable :options="locations" optionLabel="name"
+                    placeholder="Search location" class="w-full md:w-25rem" />
+                <small class="p-error" v-if="createSubRouteError.location">Invalid Location.</small>
+            </div>
+            <div class="field">
+                <label for="name">Time</label>
+                <Calendar id="calendar-timeonly" v-model="createSubRouteRequest.time" timeOnly />
+                <small class="p-error" v-if="createSubRouteError.time">Invalid Time.</small>
+            </div>
+            <template #footer>
+                <Button label="Cancel" icon="pi pi-times" text @click="hideCreateBusSubRouteDialog" />
+                <Button label="Save" icon="pi pi-check" text @click="saveSubRoute" />
             </template>
         </Dialog>
     </div>
