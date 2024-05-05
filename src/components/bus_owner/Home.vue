@@ -25,39 +25,60 @@ const createBusError = ref({
 
 const createRouteDialog = ref(false);
 const routeList = ref([])
-const createRouteRequest = ref({
-    // startTime : '',
-    // endTime : '',
-    // startLocation : '',
-    // endLocation : '',
-    // weekDay : ''
-})
+const createRouteRequest = ref({})
 const createRouteError = ref({
+    bus: false,
     startLocation: false,
     endLocation: false,
     startTime: false,
     endTime: false,
     weekDay: false
 })
+
+const buses = ref([])
+
+const initBuses = () => {
+    busList.value.forEach(bus => {
+        const { busName, id } = bus;
+        buses.value.push({ busName, id });
+    });
+}
+
 const locations = ref([
-    { name: 'New York', code: 'NY' },
-    { name: 'Rome', code: 'RM' },
-    { name: 'London', code: 'LDN' },
-    { name: 'Istanbul', code: 'IST' },
-    { name: 'Paris', code: 'PRS' }
-]);
+    { name: 'Alappuzha, Kerala' },
+    { name: 'Muhamma, Alappuzha, Kerala' },
+    { name: 'Mannamcherry, Alappuzha, Kerala' },
+    { name: 'Kavungal, Alappuzha, Kerala' },
+    { name: 'Thampakachuvad, Alappuzha, Kerala' },
+    { name: 'Rodumukku, Alappuzha, Kerala' },
+    // Add more locations here
+])
+
+
+const weekDay = ref([
+    { name: 'MONDAY' },
+    { name: 'TUESDAY' },
+    { name: 'WEDNESDAY' },
+    { name: 'THURSDAY' },
+    { name: 'FRIDAY' },
+    { name: 'SATURDAY' },
+    { name: 'SUNDAY' }
+])
+
 
 const tabMenuItems = ref([
     {
         label: 'Buses', icon: 'pi pi-address-book',
         command: () => {
             display.value = 'buses'
+            getAllBuses();
         }
     },
     {
         label: 'Routes', icon: 'pi pi-users',
         command: () => {
-            display.value = 'routes'
+            display.value = 'routes',
+                getAllRoutes();
         }
     },
     {
@@ -85,6 +106,8 @@ const hideCreateRouteDialog = () => {
 };
 
 const createRoute = () => {
+    buses.value = []
+    initBuses();
     createRouteDialog.value = true
     createRouteRequest.value = {}
     createRouteError.value.startLocation = false;
@@ -92,16 +115,18 @@ const createRoute = () => {
     createRouteError.value.startTime = false;
     createRouteError.value.endTime = false;
     createRouteError.value.weekDay = false;
+    createRouteError.value.bus = false;
+
 }
 
 
 const showToast = (content, type) => {
     if (type === 'success')
-        toast.add({ severity: 'info', summary: 'Admin', detail: content, group: 'br', life: 3000 });
+        toast.add({ severity: 'info', summary: 'Bus Owner', detail: content, group: 'br', life: 3000 });
     else if (type === 'error')
-        toast.add({ severity: 'error', summary: 'Admin', detail: content, group: 'br', life: 3000 });
+        toast.add({ severity: 'error', summary: 'Bus Owner', detail: content, group: 'br', life: 3000 });
     else if (type === 'warning') {
-        toast.add({ severity: 'warn', summary: 'Admin', detail: content, group: 'br', life: 3000 });
+        toast.add({ severity: 'warn', summary: 'Bus Owner', detail: content, group: 'br', life: 3000 });
     } else null;
 }
 
@@ -115,9 +140,41 @@ const isValidPhone = (phone) => {
     return regex.test(phone);
 }
 
+const convertTime = (timeString) => {
+    const originalDate = new Date(timeString);
+    return originalDate.toLocaleTimeString();
+}
+
+const validSaveRoute = () => {
+    const keys = Object.keys(createRouteRequest.value);
+    console.log(keys);
+    if (keys.length === 0) {
+        createRouteError.value.startLocation = true;
+        createRouteError.value.endLocation = true;
+        createRouteError.value.startTime = true;
+        createRouteError.value.endTime = true;
+        createRouteError.value.weekDay = true;
+        createRouteError.value.bus = true;
+        return true;
+    } else {
+        createRouteError.value.startLocation = false;
+        createRouteError.value.endLocation = false;
+        createRouteError.value.startTime = false;
+        createRouteError.value.endTime = false;
+        createRouteError.value.weekDay = false;
+        createRouteError.value.bus = false;
+    }
+
+    // if (!keys.includes("id") ||
+    //     createRouteRequest.value.id === '' ||
+    //     createRouteRequest.value.id === null) {
+    //     createRouteError.value.bus = true;
+    //     return true;
+    // } createRouteError.value.bus = false;
+}
+
 const validateSaveBus = () => {
     const keys = Object.keys(createBusRequest.value);
-    console.log(keys);
     if (keys.length === 0) {
         createBusError.value.busName = true
         createBusError.value.registrationNumber = true
@@ -207,6 +264,73 @@ const deleteBus = (id) => {
     });
 };
 
+const saveRoute = () => {
+
+    // if (!validSaveRoute()) return;
+
+    const CREATE_ROUTE = BASE_URL + '/routes'
+    axios.post(CREATE_ROUTE, {
+        busId: createRouteRequest.value.id.id,
+        startLocation: createRouteRequest.value.startLocation.name,
+        endLocation: createRouteRequest.value.endLocation.name,
+        startTime: convertTime(createRouteRequest.value.startTime),
+        endTime: convertTime(createRouteRequest.value.endTime),
+        day: createRouteRequest.value.weekDay.name
+    }).then((response) => {
+        if (response.status === 200) {
+            showToast('Route Created.', 'success')
+            getAllRoutes();
+            createRouteDialog.value = false;
+        }
+    }).catch((error) => {
+        // if (error.response.status === 400) {
+        //     showToast('Registration number already exists.', 'error');
+        // } else {
+        //     showToast('Something went wrong.', 'warning');
+        // }
+        console.error(error);
+    });
+}
+
+const getAllRoutes = () => {
+    const GET_ROUTE = BASE_URL + '/routes'
+    axios.get(GET_ROUTE).then((response) => {
+        if (response.status === 200) {
+            routeList.value = response.data;
+        }
+    }).catch((error) => {
+        showToast('Something went wrong.', 'warning');
+        console.error(error);
+    });
+}
+
+const deleteRoute = (id) => {
+    confirm.require({
+        message: 'Do you want to delete Route ?',
+        header: 'Danger Zone',
+        icon: 'pi pi-info-circle',
+        rejectLabel: 'Cancel',
+        acceptLabel: 'Delete',
+        rejectClass: 'p-button-secondary p-button-outlined',
+        acceptClass: 'p-button-danger',
+        accept: () => {
+            const DELETE_ROUTE = BASE_URL + '/routes/' + id;
+            axios.delete(DELETE_ROUTE).then((response) => {
+                if (response.status === 200) {
+                    getAllRoutes();
+                    showToast('Route Deleted.', 'success')
+                }
+            }).catch((error) => {
+                showToast('Something went wrong.', 'warning');
+                console.error(error);
+            });
+        },
+        reject: () => {
+            showToast('Delete Route Cancelled.', 'warning')
+        }
+    });
+}
+
 </script>
 
 <template>
@@ -243,6 +367,7 @@ const deleteBus = (id) => {
                     </div>
                 </template>
 
+                <Column field="id" header="Bus Id" sortable style="min-width:12rem"></Column>
                 <Column field="busName" header="Bus Name" sortable style="min-width:12rem"></Column>
                 <Column field="registrationNumber" header="Registration Number" sortable style="min-width:12rem">
                 </Column>
@@ -285,11 +410,11 @@ const deleteBus = (id) => {
                 </template>
             </Toolbar>
 
-            <DataTable scrollable scrollHeight="400px" ref="dt" :value="busList" dataKey="id" :paginator="true"
+            <DataTable scrollable scrollHeight="400px" ref="dt" :value="routeList" dataKey="id" :paginator="true"
                 :rows="10" :filters="filters"
                 paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                 :rowsPerPageOptions="[5, 10, 25]"
-                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} buses">
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} routes">
                 <template #header>
                     <div class="flex flex-wrap gap-2 align-items-center justify-content-between">
                         <h4 class="m-0">Buses</h4>
@@ -303,20 +428,30 @@ const deleteBus = (id) => {
                 </template>
 
                 <Column field="busName" header="Bus Name" sortable style="min-width:12rem"></Column>
-                <Column field="registrationNumber" header="Registration Number" sortable style="min-width:12rem">
+                <Column field="startLocation" header="Start Location" sortable style="min-width:12rem"></Column>
+                <Column field="endLocation" header="End Location" sortable style="min-width:12rem"></Column>
+                <Column field="startTime" header="Start Time" sortable style="min-width:12rem"></Column>
+                <Column field="endTime" header="End Time" sortable style="min-width:12rem"></Column>
+                <Column field="day" header="WeekDay" sortable style="min-width:12rem">
                 </Column>
 
                 <Column :exportable="false" style="min-width:8rem">
                     <template #body="slotProps">
                         <Button icon="pi pi-trash" outlined rounded severity="danger"
-                            @click="deleteBus(slotProps.data.id)" />
+                            @click="deleteRoute(slotProps.data.id)" />
                     </template>
                 </Column>
             </DataTable>
         </div>
 
-        <Dialog v-model:visible="createRouteDialog" :style="{ width: '450px' }" header="Create Bus" :modal="true"
+        <Dialog v-model:visible="createRouteDialog" :style="{ width: '450px' }" header="Create Route" :modal="true"
             class="p-fluid">
+            <div class="field">
+                <label for="name">Select Bus</label>
+                <Dropdown v-model="createRouteRequest.id" editable :options="buses" optionLabel="busName"
+                    placeholder="Search bus" class="w-full md:w-25rem" />
+                <small class="p-error" v-if="createRouteError.bus">Invalid Bus.</small>
+            </div>
             <div class="field">
                 <label for="name">Start Location</label>
                 <Dropdown v-model="createRouteRequest.startLocation" editable :options="locations" optionLabel="name"
@@ -332,21 +467,22 @@ const deleteBus = (id) => {
             <div class="field">
                 <label for="name">Start Time</label>
                 <Calendar id="calendar-timeonly" v-model="createRouteRequest.startTime" timeOnly />
-                <small class="p-error" v-if="createBusError.startTime">Invalid Start Time.</small>
+                <small class="p-error" v-if="createRouteError.startTime">Invalid Start Time.</small>
             </div>
             <div class="field">
                 <label for="name">End Time</label>
                 <Calendar id="calendar-timeonly" v-model="createRouteRequest.endTime" timeOnly />
-                <small class="p-error" v-if="createBusError.endTime">Invalid End Time.</small>
+                <small class="p-error" v-if="createRouteError.endTime">Invalid End Time.</small>
             </div>
             <div class="field">
                 <label for="name">Week Day</label>
-                <Dropdown v-model="createRouteRequest.weekDay" :options="locations" optionLabel="name" placeholder="Select Week day" class="w-full md:w-25rem" />
-                <small class="p-error" v-if="createBusError.weekDay">Invalid Week Day.</small>
+                <Dropdown v-model="createRouteRequest.weekDay" :options="weekDay" optionLabel="name"
+                    placeholder="Select Week day" class="w-full md:w-25rem" />
+                <small class="p-error" v-if="createRouteError.weekDay">Invalid Week Day.</small>
             </div>
             <template #footer>
                 <Button label="Cancel" icon="pi pi-times" text @click="hideCreateRouteDialog" />
-                <Button label="Save" icon="pi pi-check" text @click="saveBus" />
+                <Button label="Save" icon="pi pi-check" text @click="saveRoute" />
             </template>
         </Dialog>
     </div>
