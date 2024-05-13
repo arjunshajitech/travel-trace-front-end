@@ -29,12 +29,14 @@ const tabMenuItems = ref([
         label: 'Bus Owners', icon: 'pi pi-address-book',
         command: () => {
             display.value = 'bus_owners'
+            getAllBusOwners();
         }
     },
     {
         label: 'Users', icon: 'pi pi-users',
         command: () => {
             display.value = 'users'
+            getAllUsers();
         }
     }
 ]);
@@ -134,6 +136,19 @@ const validateSaveBusOwner = () => {
     return false;
 }
 
+const usersList = ref([]);
+const getAllUsers = () => {
+    const GET_BUS_OWNER_URL = BASE_URL + '/users'
+    axios.get(GET_BUS_OWNER_URL).then((response) => {
+        if (response.status === 200) {
+            usersList.value = response.data;
+        }
+    }).catch((error) => {
+        showToast('Something went wrong.', 'warning');
+        console.error(error);
+    });
+}
+
 const getAllBusOwners = () => {
     const GET_BUS_OWNER_URL = BASE_URL + '/busowners'
     axios.get(GET_BUS_OWNER_URL).then((response) => {
@@ -214,7 +229,8 @@ const deleteBusOwner = (id) => {
                 </template>
             </Toolbar>
 
-            <DataTable scrollable scrollHeight="400px" ref="dt" :value="busOwnersList" dataKey="id" :paginator="true" :rows="10" :filters="filters"
+            <DataTable scrollable scrollHeight="400px" ref="dt" :value="busOwnersList" dataKey="id" :paginator="true"
+                :rows="10" :filters="filters"
                 paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                 :rowsPerPageOptions="[5, 10, 25]"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} bus owners">
@@ -281,8 +297,8 @@ const deleteBusOwner = (id) => {
 
     <div class="admin-list-users" v-else>
         <div class="card">
-            <DataTable scrollable scrollHeight="400px" ref="dt" :value="products" v-model:selection="selectedProducts" dataKey="id" :paginator="true"
-                :rows="10" :filters="filters"
+            <DataTable scrollable scrollHeight="400px" ref="dt" :value="usersList" v-model:selection="selectedProducts"
+                dataKey="id" :paginator="true" :rows="10" :filters="filters"
                 paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                 :rowsPerPageOptions="[5, 10, 25]"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users">
@@ -298,10 +314,11 @@ const deleteBusOwner = (id) => {
                     </div>
                 </template>
 
-                <Column field="code" header="Name" sortable style="min-width:12rem"></Column>
-                <Column field="name" header="Email" sortable style="min-width:16rem"></Column>
-                <Column field="name" header="Password" sortable style="min-width:16rem"></Column>
-                <Column field="name" header="Phone" sortable style="min-width:16rem"></Column>
+                <Column field="firstName" header="First Name" sortable style="min-width:12rem"></Column>
+                <Column field="lastName" header="Last Name" sortable style="min-width:16rem"></Column>
+                <Column field="email" header="Email" sortable style="min-width:16rem"></Column>
+                <Column field="password" header="Password" sortable style="min-width:16rem"></Column>
+                <Column field="phone" header="Phone" sortable style="min-width:16rem"></Column>
 
             </DataTable>
         </div>
