@@ -15,12 +15,12 @@ const showLogout = ref(false);
 
 const NavBarItems = ref([
     {
-        label: 'Bus Trace',
-        icon: 'pi pi-map-marker'
-    },
-    {
         label: 'Home',
         icon: 'pi pi-home'
+    },
+    {
+        label: 'Bus Trace',
+        icon: 'pi pi-map-marker'
     },
     // {
     //     label: 'About',

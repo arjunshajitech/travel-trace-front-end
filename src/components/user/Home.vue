@@ -10,6 +10,8 @@ const toast = useToast();
 const router = useRouter();
 
 const busList = ref([]);
+const subRouteList = ref([]);
+const showBusRoute = ref(false);
 
 
 const getBusList = () => {
@@ -47,6 +49,33 @@ const getSeverity = (product) => {
     }
 };
 
+const events = ref([
+    { status: 'Ordered', date: '15/10/2020 10:30', icon: 'pi pi-shopping-cart', color: '#9C27B0' },
+    { status: 'Processing', date: '15/10/2020 14:00', icon: 'pi pi-cog', color: '#673AB7' },
+    { status: 'Shipped', date: '15/10/2020 16:15', icon: 'pi pi-shopping-cart', color: '#FF9800' },
+    { status: 'Delivered', date: '16/10/2020 10:00', icon: 'pi pi-check', color: '#607D8B' },
+    { status: 'Ordered', date: '15/10/2020 10:30', icon: 'pi pi-shopping-cart', color: '#9C27B0' },
+    { status: 'Processing', date: '15/10/2020 14:00', icon: 'pi pi-cog', color: '#673AB7' },
+    { status: 'Shipped', date: '15/10/2020 16:15', icon: 'pi pi-shopping-cart', color: '#FF9800' },
+    { status: 'Delivered', date: '16/10/2020 10:00', icon: 'pi pi-check', color: '#607D8B' },
+]);
+
+
+const showRoute = (id) => {
+    showBusRoute.value = true;
+    showSubRoute(id);
+}
+
+
+const showSubRoute = (id) => {
+    const SUB_ROUTE_LIST = BASE_URL + '/user/sub/routes/' + id;
+    axios.get(SUB_ROUTE_LIST).then((res) => {
+        if (res.status === 200) {
+            subRouteList.value = res.data;
+        }
+    }).catch((error) => { console.error(error) });
+}
+
 </script>
 
 
@@ -56,6 +85,8 @@ const getSeverity = (product) => {
 <template>
     <div class="bus-list-container">
         <div class="card">
+            <Toast position="bottom-right" group="br" />
+            <ConfirmDialog></ConfirmDialog>
             <DataView :value="busList" paginator :rows="5">
                 <template #list="slotProps">
                     <div class="grid grid-nogutter">
@@ -69,8 +100,8 @@ const getSeverity = (product) => {
                                         severity="error" class="absolute" style="left: 4px; top: 4px"></Tag>
                                     <Tag v-else-if="item.started === false && item.ended === false" value="Not Started"
                                         severity="warning" class="absolute" style="left: 4px; top: 4px"></Tag>
-                                    <Tag v-else value="Completed"
-                                        severity="success" class="absolute" style="left: 4px; top: 4px"></Tag>
+                                    <Tag v-else value="Completed" severity="success" class="absolute"
+                                        style="left: 4px; top: 4px"></Tag>
                                 </div>
                                 <div
                                     class="flex flex-column md:flex-row justify-content-between md:align-items-center flex-1">
@@ -96,10 +127,11 @@ const getSeverity = (product) => {
                                             item.ownerName }} | Bus
                                             Name : {{ item.busName }}</span>
                                         <div class="flex flex-row-reverse md:flex-row gap-2">
-                                            <Button icon="pi pi-shopping-cart" label="Show Route"
+                                            <Button icon="pi pi-directions" label="Show Route" @click="showRoute(item.route.id)"
                                                 :disabled="item.inventoryStatus === 'OUTOFSTOCK'"
                                                 class="flex-auto md:flex-initial white-space-nowrap"></Button>
-                                            <Button v-if="item.started" icon="pi pi-shopping-cart" label="Current Location"
+                                            <Button v-if="item.started" icon="pi pi-shopping-cart"
+                                                label="Current Location"
                                                 :disabled="item.inventoryStatus === 'OUTOFSTOCK'"
                                                 class="flex-auto md:flex-initial white-space-nowrap"></Button>
                                         </div>
@@ -111,5 +143,19 @@ const getSeverity = (product) => {
                 </template>
             </DataView>
         </div>
+
+        <Dialog v-model:visible="showBusRoute" :style="{ width: '450px' }" header="Bus Routes" :modal="true"
+            class="p-fluid">
+            <div class="card">
+                <Timeline :value="subRouteList">
+                    <template #opposite="slotProps">
+                        <small class="p-text-secondary">{{slotProps.item.subRoute.busTime}}</small>
+                    </template>
+                    <template #content="slotProps">
+                        {{slotProps.item.subRoute.location}}
+                    </template>
+                </Timeline>
+            </div>
+        </Dialog>
     </div>
 </template>

@@ -9,8 +9,8 @@ const router = useRouter();
 const toast = useToast();
 const BASE_URL = 'http://localhost:8080/admin'
 
-const email = ref('admin@admin.com')
-const password = ref('Password@1')
+const email = ref('')
+const password = ref('')
 const errors = ref({
     email: false,
     password: false
