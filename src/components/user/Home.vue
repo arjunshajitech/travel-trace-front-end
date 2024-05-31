@@ -13,18 +13,6 @@ const busList = ref([]);
 const subRouteList = ref([]);
 const showBusRoute = ref(false);
 
-
-const getBusList = () => {
-    const BUS_LIST = BASE_URL + '/user/routes?day=' + getCurrentDayInCaps();
-    axios.get(BUS_LIST).then((res) => {
-        if (res.status === 200) {
-            busList.value = res.data;
-        }
-    }).catch((error) => { console.error(error) });
-}
-getBusList();
-
-
 function getCurrentDayInCaps() {
     var currentDate = new Date();
     var currentDayOfWeek = currentDate.getDay();
@@ -33,32 +21,23 @@ function getCurrentDayInCaps() {
     return currentDayNameInCaps;
 }
 
-const getSeverity = (product) => {
-    switch (product.inventoryStatus) {
-        case 'INSTOCK':
-            return 'success';
+const isToday = ref(true)
+const today = ref();
+today.value = getCurrentDayInCaps();
 
-        case 'LOWSTOCK':
-            return 'warning';
+const getBusList = (today) => {
+    const BUS_LIST = BASE_URL + '/user/routes?day=' + today;
+    axios.get(BUS_LIST).then((res) => {
+        if (res.status === 200) {
+            busList.value = res.data;
+        }
+    }).catch((error) => { console.error(error) });
+}
+getBusList(today.value);
 
-        case 'OUTOFSTOCK':
-            return 'danger';
 
-        default:
-            return null;
-    }
-};
 
-const events = ref([
-    { status: 'Ordered', date: '15/10/2020 10:30', icon: 'pi pi-shopping-cart', color: '#9C27B0' },
-    { status: 'Processing', date: '15/10/2020 14:00', icon: 'pi pi-cog', color: '#673AB7' },
-    { status: 'Shipped', date: '15/10/2020 16:15', icon: 'pi pi-shopping-cart', color: '#FF9800' },
-    { status: 'Delivered', date: '16/10/2020 10:00', icon: 'pi pi-check', color: '#607D8B' },
-    { status: 'Ordered', date: '15/10/2020 10:30', icon: 'pi pi-shopping-cart', color: '#9C27B0' },
-    { status: 'Processing', date: '15/10/2020 14:00', icon: 'pi pi-cog', color: '#673AB7' },
-    { status: 'Shipped', date: '15/10/2020 16:15', icon: 'pi pi-shopping-cart', color: '#FF9800' },
-    { status: 'Delivered', date: '16/10/2020 10:00', icon: 'pi pi-check', color: '#607D8B' },
-]);
+
 
 
 const showRoute = (id) => {
@@ -76,6 +55,27 @@ const showSubRoute = (id) => {
     }).catch((error) => { console.error(error) });
 }
 
+
+const weekday = ref();
+const weekdays = ref([
+    { name: 'MONDAY', code: 'NY' },
+    { name: 'TUESDAY', code: 'RM' },
+    { name: 'WEDNESDAY', code: 'LDN' },
+    { name: 'THURSDAY', code: 'IST' },
+    { name: 'FRIDAY', code: 'PRS' },
+    { name: 'SATURDAY', code: 'IST' },
+    { name: 'SUNDAY', code: 'PRS' }
+]);
+
+const handleChange = () => {
+    if (weekday.value.name === getCurrentDayInCaps()) {
+        isToday.value = true;
+    } else {
+        isToday.value = false;
+    }
+    getBusList(weekday.value.name);
+}
+
 </script>
 
 
@@ -84,6 +84,13 @@ const showSubRoute = (id) => {
 
 <template>
     <div class="bus-list-container">
+
+        <div class="select-weekday">
+            <div class="card flex justify-content-center">
+                <Dropdown @change="handleChange" v-model="weekday" :options="weekdays" optionLabel="name"
+                    placeholder="Select WeekDay" class="w-full md:w-14rem" />
+            </div>
+        </div>
         <div class="card">
             <Toast position="bottom-right" group="br" />
             <ConfirmDialog></ConfirmDialog>
@@ -96,12 +103,15 @@ const showSubRoute = (id) => {
                                 <div class="md:w-10rem relative">
                                     <img class="block xl:block mx-auto border-round w-full" src="/logo.png"
                                         :alt="item" />
-                                    <Tag v-if="item.started === true && item.ended === false" value="Started"
-                                        severity="error" class="absolute" style="left: 4px; top: 4px"></Tag>
-                                    <Tag v-else-if="item.started === false && item.ended === false" value="Not Started"
-                                        severity="warning" class="absolute" style="left: 4px; top: 4px"></Tag>
-                                    <Tag v-else value="Completed" severity="success" class="absolute"
-                                        style="left: 4px; top: 4px"></Tag>
+                                    <div v-if="isToday">
+                                        <Tag v-if="item.started === true && item.ended === false" value="Started"
+                                            severity="error" class="absolute" style="left: 4px; top: 4px"></Tag>
+                                        <Tag v-else-if="item.started === false && item.ended === false"
+                                            value="Not Started" severity="warning" class="absolute"
+                                            style="left: 4px; top: 4px"></Tag>
+                                        <Tag v-else value="Completed" severity="success" class="absolute"
+                                            style="left: 4px; top: 4px"></Tag>
+                                    </div>
                                 </div>
                                 <div
                                     class="flex flex-column md:flex-row justify-content-between md:align-items-center flex-1">
@@ -127,13 +137,14 @@ const showSubRoute = (id) => {
                                             item.ownerName }} | Bus
                                             Name : {{ item.busName }}</span>
                                         <div class="flex flex-row-reverse md:flex-row gap-2">
-                                            <Button icon="pi pi-directions" label="Show Route" @click="showRoute(item.route.id)"
+                                            <Button icon="pi pi-directions" label="Show Route"
+                                                @click="showRoute(item.route.id)"
                                                 :disabled="item.inventoryStatus === 'OUTOFSTOCK'"
                                                 class="flex-auto md:flex-initial white-space-nowrap"></Button>
-                                            <Button v-if="item.started" icon="pi pi-shopping-cart"
+                                            <!-- <Button v-if="item.started" icon="pi pi-angle-double-up"
                                                 label="Current Location"
                                                 :disabled="item.inventoryStatus === 'OUTOFSTOCK'"
-                                                class="flex-auto md:flex-initial white-space-nowrap"></Button>
+                                                class="flex-auto md:flex-initial white-space-nowrap"></Button> -->
                                         </div>
                                     </div>
                                 </div>
@@ -149,10 +160,13 @@ const showSubRoute = (id) => {
             <div class="card">
                 <Timeline :value="subRouteList">
                     <template #opposite="slotProps">
-                        <small class="p-text-secondary">{{slotProps.item.subRoute.busTime}}</small>
+                        <small class="p-text-secondary">{{ slotProps.item.subRoute.busTime }}</small>
                     </template>
                     <template #content="slotProps">
-                        {{slotProps.item.subRoute.location}}
+                        <small v-if="slotProps.item.completed === false" class="p-text-secondary red-color">{{
+                            slotProps.item.subRoute.location }}</small>
+                        <small v-else class="p-text-secondary color-green">{{ slotProps.item.subRoute.location
+                            }}</small>
                     </template>
                 </Timeline>
             </div>

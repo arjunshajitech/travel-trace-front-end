@@ -28,8 +28,8 @@ sessionCheck();
 
 const NavBarItems = ref([
     {
-        label: 'Bus Trace',
-        icon: 'pi pi-map-marker',
+        label: 'Travel Trace',
+        icon: 'pi pi-carr',
     },
     {
         label: 'Bus Owner Panel',

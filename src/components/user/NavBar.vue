@@ -19,8 +19,8 @@ const NavBarItems = ref([
         icon: 'pi pi-home'
     },
     {
-        label: 'Bus Trace',
-        icon: 'pi pi-map-marker'
+        label: 'Travel Trace',
+        icon: 'pi pi-car'
     },
     // {
     //     label: 'About',

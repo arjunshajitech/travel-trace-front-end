@@ -95,11 +95,30 @@
 
 .bus-list-container {
     display: flex;
+    flex-direction: column;
     justify-content: center;
+    align-items: center;
     width: 100%;
     margin-top: 20px;
 
     .card {
         width: 1200px;
     }
+
+    #pv_id_2 {
+        width : 72rem !important;
+    }
+}
+
+.p-text-secondary {
+    color: #3B82F6;
+    font-weight: bold;
+}
+
+.color-green {
+    color: #24c316;
+}
+
+.red-color {
+    color: #c32416;
 }

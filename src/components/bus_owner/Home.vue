@@ -93,6 +93,7 @@ const tabMenuItems = ref([
         label: 'Routes', icon: 'pi pi-users',
         command: () => {
             display.value = 'routes'
+            getAllBuses();
             getAllRoutes();
         }
     },
@@ -100,6 +101,7 @@ const tabMenuItems = ref([
         label: 'Sub Routes', icon: 'pi pi-users',
         command: () => {
             display.value = 'sub_routes'
+            getAllBuses();
             getAllRoutes();
             getAllSubRoutes();
         }
@@ -376,6 +378,8 @@ const saveSubRoute = () => {
     }).then((response) => {
         if (response.status === 200) {
             showToast('Sub Route Created.', 'success')
+            getAllBuses();
+            getAllRoutes();
             getAllSubRoutes();
             createSubRouteDialog.value = false;
         }

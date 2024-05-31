@@ -4,11 +4,11 @@ import { ref } from "vue";
 const NavBarItems = ref([
     {
         label: 'Travel Trace | All Rights Reserved.',
-        icon: 'pi pi-map-marker'
+        icon: 'pi pi-car'
     },
     {
         label: 'contact@traveltrace.com',
-        icon: 'pi pi-at'
+        icon: 'pi pi-envelope'
     }
 ])
 
