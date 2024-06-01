@@ -25,11 +25,27 @@ const isToday = ref(true)
 const today = ref();
 today.value = getCurrentDayInCaps();
 
-const getBusList = (today) => {
+const getBusList = async (today) => {
     const BUS_LIST = BASE_URL + '/user/routes?day=' + today;
-    axios.get(BUS_LIST).then((res) => {
+    await axios.get(BUS_LIST).then((res) => {
         if (res.status === 200) {
-            busList.value = res.data;
+            const sortedBusList = res.data.sort((a, b) => {
+                if (a.started === true && b.started === false) {
+                    return -1;
+                } else if (a.started === false && b.started === true) {
+                    return 1;
+                } else {
+                    if (a.ended === false && b.ended === true) {
+                        return -1;
+                    } else if (a.ended === true && b.ended === false) {
+                        return 1;
+                    }
+                    return 0;
+                }
+            });
+
+            // Assign the sorted list to busList.value
+            busList.value = sortedBusList;
         }
     }).catch((error) => { console.error(error) });
 }
@@ -57,6 +73,7 @@ const showSubRoute = (id) => {
 
 
 const weekday = ref();
+const sorted = ref();
 const weekdays = ref([
     { name: 'MONDAY', code: 'NY' },
     { name: 'TUESDAY', code: 'RM' },
@@ -67,7 +84,29 @@ const weekdays = ref([
     { name: 'SUNDAY', code: 'PRS' }
 ]);
 
+const sort = ref([
+    { name: 'STARTED', code: 'NY' },
+    { name: 'COMPLETED', code: 'RM' },
+    { name: 'NOT STARTED', code: 'LDN' },
+]);
+
+const sortChange = async () => {
+    let day = getCurrentDayInCaps();
+    let val = sorted.value.name;
+    await getBusList(day);
+
+    if (val === 'STARTED') {
+        busList.value = busList.value.filter(bus => bus.started === true && bus.ended === false);
+    } else if (val === 'NOT STARTED') {
+        busList.value = busList.value.filter(bus => bus.started === false && bus.ended === false);
+    } else if (val === 'COMPLETED') {
+        busList.value = busList.value.filter(bus => bus.started === false && bus.ended === true);
+    }
+}
+
+
 const handleChange = () => {
+    sorted.value = ''
     if (weekday.value.name === getCurrentDayInCaps()) {
         isToday.value = true;
     } else {
@@ -85,16 +124,19 @@ const handleChange = () => {
 <template>
     <div class="bus-list-container">
 
-        <div class="select-weekday">
+        <div class="select-weekday mt-2">
             <div class="card flex justify-content-center">
                 <Dropdown @change="handleChange" v-model="weekday" :options="weekdays" optionLabel="name"
-                    placeholder="Select WeekDay" class="w-full md:w-14rem" />
+                    placeholder="Select WeekDay" class="w-full md:w-14rem mr-3" />
+                <Dropdown @change="sortChange" v-model="sorted" v-if="isToday" :options="sort" optionLabel="name"
+                    placeholder="Sort Started.., Completed.., Not Started.." class="w-full md:w-14rem" />
             </div>
         </div>
-        <div class="card">
+
+        <div class="card mt-5">
             <Toast position="bottom-right" group="br" />
             <ConfirmDialog></ConfirmDialog>
-            <DataView :value="busList" paginator :rows="5">
+            <DataView :value="busList" paginator :rows="4">
                 <template #list="slotProps">
                     <div class="grid grid-nogutter">
                         <div v-for="(item, index) in slotProps.items" :key="index" class="col-12">
@@ -105,11 +147,11 @@ const handleChange = () => {
                                         :alt="item" />
                                     <div v-if="isToday">
                                         <Tag v-if="item.started === true && item.ended === false" value="Started"
-                                            severity="error" class="absolute" style="left: 4px; top: 4px"></Tag>
+                                            severity="success" class="absolute" style="left: 4px; top: 4px"></Tag>
                                         <Tag v-else-if="item.started === false && item.ended === false"
                                             value="Not Started" severity="warning" class="absolute"
                                             style="left: 4px; top: 4px"></Tag>
-                                        <Tag v-else value="Completed" severity="success" class="absolute"
+                                        <Tag v-else value="Completed" severity="error" class="absolute"
                                             style="left: 4px; top: 4px"></Tag>
                                     </div>
                                 </div>

@@ -9,7 +9,7 @@ const router = useRouter();
 const toast = useToast();
 const BASE_URL = 'http://localhost:8080/user'
 
-const display = ref('login');
+const display = ref('signup');
 const name = ref();
 const email = ref();
 const accept = ref(false);

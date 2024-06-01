@@ -81,7 +81,7 @@ const login = () => {
         <div class="card flex justify-content-center p-fluid">
             <div v-focustrap class="w-full" style="max-width: 20rem">
                 <div class="field">
-                    <h1>Bus Onwer Panel Login</h1>
+                    <h1>Bus Owner Panel Login</h1>
                 </div>
                 <div class="field">
                     <IconField>

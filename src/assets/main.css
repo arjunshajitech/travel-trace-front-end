@@ -49,6 +49,8 @@
     }
 
     span {
+        color: #3B82F6;
+        font-weight: 500;
         font-size: 20px;
         margin: 0px 10px 0px 10px;
     }
@@ -105,8 +107,8 @@
         width: 1200px;
     }
 
-    #pv_id_2 {
-        width : 72rem !important;
+    .p-dropdown {
+        width : 30rem !important;
     }
 }
 
@@ -116,7 +118,7 @@
 }
 
 .color-green {
-    color: #24c316;
+    color: #22C55E;
 }
 
 .red-color {
