@@ -123,11 +123,12 @@ const handleChange = () => {
 
 <template>
     <div class="bus-list-container">
+        
 
         <div class="select-weekday mt-2">
             <div class="card flex justify-content-center">
                 <Dropdown @change="handleChange" v-model="weekday" :options="weekdays" optionLabel="name"
-                    placeholder="Select WeekDay" class="w-full md:w-14rem mr-3" />
+                    placeholder="View Buses" class="w-full md:w-14rem mr-3" />
                 <Dropdown @change="sortChange" v-model="sorted" v-if="isToday" :options="sort" optionLabel="name"
                     placeholder="Sort Started.., Completed.., Not Started.." class="w-full md:w-14rem" />
             </div>
@@ -160,24 +161,28 @@ const handleChange = () => {
                                     <div
                                         class="flex flex-row md:flex-column justify-content-between align-items-start gap-2">
                                         <div>
-                                            <span class="text-xl font-semibold text-900">{{ item.route.startTime }} -
-                                                {{ item.route.endTime }}</span>
-                                            <div class="text-lg font-medium text-900 mt-2">{{ item.route.startLocation
+                                            <span class="text-xl font-semibold text-900">{{ item.route.startTime }} {{
+                                                item.startTime }} --->
+                                                {{ item.route.endTime }} {{ item.endTime }}</span>
+                                            <div class="text-lg font-medium text-900 mt-2"> {{ item.route.startLocation
                                                 }}
-                                                - {{ item.route.endLocation }}</div>
+                                                ---> {{ item.route.endLocation }}</div>
                                         </div>
-                                        <div class="surface-100 p-1" style="border-radius: 30px">
-                                            <div class="surface-0 flex align-items-center gap-2 justify-content-center py-1 px-2"
+                                        <div class="surface-100 p-2" style="border-radius: 20px">
+                                            <!-- <div class="surface-0 flex align-items-center gap-2 justify-content-center py-1 px-2"
                                                 style="border-radius: 30px; box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.04), 0px 1px 2px 0px rgba(0, 0, 0, 0.06)">
                                                 <span class="text-900 font-medium text-sm">5</span>
                                                 <i class="pi pi-star-fill text-yellow-500"></i>
-                                            </div>
+                                            </div> -->
+                                            <span class="font-medium text-secondary text-sm">Bus Owner Name : {{
+                                                item.ownerName }} | Bus
+                                                Name : {{ item.busName }} | Ph : {{ item.phone }}</span>
                                         </div>
                                     </div>
                                     <div class="flex flex-column md:align-items-end gap-5">
-                                        <span class="font-medium text-secondary text-sm">Bus Owner : {{
+                                        <!-- <span class="font-medium text-secondary text-sm">Bus Owner : {{
                                             item.ownerName }} | Bus
-                                            Name : {{ item.busName }}</span>
+                                            Name : {{ item.busName }}</span> -->
                                         <div class="flex flex-row-reverse md:flex-row gap-2">
                                             <Button icon="pi pi-directions" label="Show Route"
                                                 @click="showRoute(item.route.id)"
@@ -202,7 +207,8 @@ const handleChange = () => {
             <div class="card">
                 <Timeline :value="subRouteList">
                     <template #opposite="slotProps">
-                        <small class="p-text-secondary">{{ slotProps.item.subRoute.busTime }}</small>
+                        <small class="p-text-secondary">{{ slotProps.item.subRoute.busTime }}
+                            {{ slotProps.item.times }}</small>
                     </template>
                     <template #content="slotProps">
                         <small v-if="slotProps.item.completed === false" class="p-text-secondary red-color">{{
