@@ -127,6 +127,7 @@ const hideCreateRouteDialog = () => {
 const createRoute = () => {
     buses.value = []
     initBuses();
+    console.log(buses.value)
     createRouteDialog.value = true
     createRouteRequest.value = {}
     createRouteError.value.startLocation = false;
@@ -549,19 +550,8 @@ const deleteSubRoute = (id) => {
             class="p-fluid">
             <div class="field">
                 <label for="name">Select Bus</label>
-                <Dropdown v-model="createRouteRequest" :options="buses" optionLabel="busName" optionGroupLabel="label"
-                    optionGroupChildren="items" placeholder="Select a City" class="w-full md:w-14rem">
-                    <template #optiongroup="slotProps">
-                        <div class="flex align-items-center">
-                            <img :alt="slotProps.option.label"
-                                src="https://primefaces.org/cdn/primevue/images/flag/flag_placeholder.png"
-                                :class="`mr-2 flag flag-${slotProps.option.code.toLowerCase()}`" style="width: 18px" />
-                            <div>{{ slotProps.option.label }}</div>
-                        </div>
-                    </template>
-                </Dropdown>
-                <!-- <Dropdown v-model="createRouteRequest.id" editable :options="buses" optionLabel="busName"
-                    placeholder="Search bus" class="w-full md:w-25rem" /> -->
+                <Dropdown v-model="createRouteRequest.id" editable :options="buses" optionLabel="busName"
+                    placeholder="Search bus" class="w-full md:w-25rem" />
                 <small class="p-error" v-if="createRouteError.bus">Invalid Bus.</small>
             </div>
             <div class="field">
